@@ -1,11 +1,18 @@
 package anonymousme.gitstar.Activities;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -26,12 +33,15 @@ public class Home extends AppCompatActivity {
     private ProjectAdapter mAdapter;
     private SwipeRefreshLayout swipeContainer;
     private ProgressDialog mProgress;
+    SharedPreferences sharedPref;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        sharedPref= getSharedPreferences("myPref", getApplicationContext().MODE_PRIVATE);
         mProgress = new ProgressDialog(Home.this);
         mProgress.setCancelable(false);
         mProgress.setMessage("Loading...");
@@ -77,22 +87,33 @@ public class Home extends AppCompatActivity {
                 .build();
 
         GitHubAPI api = retrofit.create(GitHubAPI.class);
+        for (final String usr : Users.usernames) {
 
-        for(final String usr : Users.usernames) {
-
-            Call<List<Project>> projectListCall = api.getProjectList(usr, "14c11d585eb69aaa23b8022f95c73cae7c442d5d");
+            Call<List<Project>> projectListCall = api.getProjectList(usr, sharedPref.getString("user_id", ""));
 
             projectListCall.enqueue(new Callback<List<Project>>() {
                 @Override
                 public void onResponse(Call<List<Project>> call, Response<List<Project>> response) {
-                    for (Project project:response.body())
-                        mAdapter.add(project);
+                    try {
+                        for (Project project : response.body())
+                            mAdapter.add(project);
 
-                    if(usr.equals("jaredly")){
-                        if (swipeContainer.isRefreshing())
-                            swipeContainer.setRefreshing(false);
-                        else
-                            mProgress.dismiss();
+                        if (usr.equals("jaredly")) {
+                            if (swipeContainer.isRefreshing())
+                                swipeContainer.setRefreshing(false);
+                            else
+                                mProgress.dismiss();
+                        }
+                    } catch (Exception e) {
+                        if (e.getMessage().contains("invoke interface method")) {
+                            sharedPref= getSharedPreferences("myPref", getApplicationContext().MODE_PRIVATE);
+                            editor=sharedPref.edit();
+                            editor.putString("user_id", "0");
+                            editor.commit();
+                            finish();
+                            Toast.makeText(getApplicationContext(),"Your access token is expired/invalid.",Toast.LENGTH_SHORT).show();
+                            getApplicationContext().startActivity(new Intent(getApplicationContext(), Login.class));
+                        }
                     }
                 }
 
@@ -107,4 +128,23 @@ public class Home extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.logout_menu, menu);
+        return true;
+    }
+
+    public void logout(MenuItem item) {
+        sharedPref= getSharedPreferences("myPref", getApplicationContext().MODE_PRIVATE);
+        editor=sharedPref.edit();
+
+        editor.putString("user_id", "0");
+        editor.commit();
+
+        finish();
+        getApplicationContext().startActivity(new Intent(getApplicationContext(), Login.class));
+
+    }
 }
