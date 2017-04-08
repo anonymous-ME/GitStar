@@ -25,7 +25,10 @@ public class Login extends AppCompatActivity {
 
         try {
             if (isValidToken(token)) {
-                getApplicationContext().startActivity(new Intent(getApplicationContext(), Home.class));
+                finish();
+                Intent intent = new Intent(getApplicationContext(), Home.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                getApplicationContext().startActivity(intent);
             }
         }catch (Exception e){
             editor.putString("user_id", "0");
@@ -41,7 +44,9 @@ public class Login extends AppCompatActivity {
         editor.putString("user_id", ((TextView) findViewById(R.id.token)).getText()+"");
         editor.commit();
         finish();
-        getApplicationContext().startActivity(new Intent(getApplicationContext(), Home.class));
+        Intent intent = new Intent(getApplicationContext(), Home.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        getApplicationContext().startActivity(intent);
 
     }
 

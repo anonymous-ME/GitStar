@@ -1,9 +1,12 @@
 package anonymousme.gitstar.Activities;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -103,6 +106,7 @@ public class Home extends AppCompatActivity {
                                 swipeContainer.setRefreshing(false);
                             else
                                 mProgress.dismiss();
+                            mAdapter.randomize();
                         }
                     } catch (Exception e) {
                         if (e.getMessage().contains("invoke interface method")) {
@@ -115,15 +119,19 @@ public class Home extends AppCompatActivity {
                             getApplicationContext().startActivity(new Intent(getApplicationContext(), Login.class));
                         }
                     }
+                    mAdapter.notifyDataSetChanged();
                 }
 
                 @Override
                 public void onFailure(Call<List<Project>> call, Throwable t) {
-
+                    if (swipeContainer.isRefreshing())
+                        swipeContainer.setRefreshing(false);
+                    else
+                        mProgress.dismiss();
+                    Toast.makeText(getApplicationContext(),"Unable to load the repositories.",Toast.LENGTH_SHORT).show();
                 }
             });
         }
-
         mAdapter.randomize();
         mAdapter.notifyDataSetChanged();
     }
@@ -137,14 +145,33 @@ public class Home extends AppCompatActivity {
     }
 
     public void logout(MenuItem item) {
-        sharedPref= getSharedPreferences("myPref", getApplicationContext().MODE_PRIVATE);
-        editor=sharedPref.edit();
+        new AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Would you like to logout?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    sharedPref= getSharedPreferences("myPref", getApplicationContext().MODE_PRIVATE);
+                    editor=sharedPref.edit();
 
-        editor.putString("user_id", "0");
-        editor.commit();
+                    editor.putString("user_id", "0");
+                    editor.commit();
 
+                    finish();
+                    getApplicationContext().startActivity(new Intent(getApplicationContext(), Login.class));
+            }
+        })
+        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // user doesn't want to logout
+            }
+        })
+        .show();
+
+    }
+
+    @Override
+    public void onBackPressed() {
         finish();
-        getApplicationContext().startActivity(new Intent(getApplicationContext(), Login.class));
-
+        super.onBackPressed();
     }
 }
