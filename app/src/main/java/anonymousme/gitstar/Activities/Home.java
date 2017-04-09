@@ -44,7 +44,7 @@ public class Home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sharedPref= getSharedPreferences("myPref", getApplicationContext().MODE_PRIVATE);
+        sharedPref= getSharedPreferences("myPref", Home.this.MODE_PRIVATE);
         mProgress = new ProgressDialog(Home.this);
         mProgress.setCancelable(false);
         mProgress.setMessage("Loading...");
@@ -53,7 +53,7 @@ public class Home extends AppCompatActivity {
 
         mAdapter = new ProjectAdapter(Home.this);
 
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(Home.this);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setAdapter(mAdapter);
 
@@ -110,13 +110,13 @@ public class Home extends AppCompatActivity {
                         }
                     } catch (Exception e) {
                         if (e.getMessage().contains("invoke interface method")) {
-                            sharedPref= getSharedPreferences("myPref", getApplicationContext().MODE_PRIVATE);
+                            sharedPref= getSharedPreferences("myPref", Home.this.MODE_PRIVATE);
                             editor=sharedPref.edit();
                             editor.putString("user_id", "0");
                             editor.commit();
                             finish();
-                            Toast.makeText(getApplicationContext(),"Your access token is expired/invalid.",Toast.LENGTH_SHORT).show();
-                            getApplicationContext().startActivity(new Intent(getApplicationContext(), Login.class));
+                            Toast.makeText(Home.this,"Your access token is expired/invalid.",Toast.LENGTH_SHORT).show();
+                            Home.this.startActivity(new Intent(Home.this, Login.class));
                         }
                     }
                     mAdapter.notifyDataSetChanged();
@@ -128,7 +128,7 @@ public class Home extends AppCompatActivity {
                         swipeContainer.setRefreshing(false);
                     else
                         mProgress.dismiss();
-                    Toast.makeText(getApplicationContext(),"Unable to load the repositories.",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Home.this,"Unable to load the repositories.",Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -150,14 +150,14 @@ public class Home extends AppCompatActivity {
                 .setMessage("Would you like to logout?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                    sharedPref= getSharedPreferences("myPref", getApplicationContext().MODE_PRIVATE);
+                    sharedPref= getSharedPreferences("myPref", Home.this.MODE_PRIVATE);
                     editor=sharedPref.edit();
 
                     editor.putString("user_id", "0");
                     editor.commit();
 
                     finish();
-                    getApplicationContext().startActivity(new Intent(getApplicationContext(), Login.class));
+                    Home.this.startActivity(new Intent(Home.this, Login.class));
             }
         })
         .setNegativeButton("No", new DialogInterface.OnClickListener() {

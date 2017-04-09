@@ -18,7 +18,7 @@ public class Login extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        sharedPref= getSharedPreferences("myPref", getApplicationContext().MODE_PRIVATE);
+        sharedPref= getSharedPreferences("myPref", Login.this.MODE_PRIVATE);
         editor=sharedPref.edit();
 
         String token = sharedPref.getString("user_id", "");
@@ -26,9 +26,9 @@ public class Login extends AppCompatActivity {
         try {
             if (isValidToken(token)) {
                 finish();
-                Intent intent = new Intent(getApplicationContext(), Home.class);
+                Intent intent = new Intent(Login.this, Home.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                getApplicationContext().startActivity(intent);
+                Login.this.startActivity(intent);
             }
         }catch (Exception e){
             editor.putString("user_id", "0");
@@ -44,9 +44,9 @@ public class Login extends AppCompatActivity {
         editor.putString("user_id", ((TextView) findViewById(R.id.token)).getText()+"");
         editor.commit();
         finish();
-        Intent intent = new Intent(getApplicationContext(), Home.class);
+        Intent intent = new Intent(Login.this, Home.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        getApplicationContext().startActivity(intent);
+        Login.this.startActivity(intent);
 
     }
 
@@ -62,9 +62,9 @@ public class Login extends AppCompatActivity {
 
 
     public void sign_up(View view) {
-        Intent myIntent = new Intent(getApplicationContext(), ProjectView.class);
+        Intent myIntent = new Intent(Login.this, ProjectView.class);
         myIntent.putExtra("url","https://github.com/settings/tokens/new");
         myIntent.putExtra("title", "Github Token");
-        getApplicationContext().startActivity(myIntent);
+        Login.this.startActivity(myIntent);
     }
 }
